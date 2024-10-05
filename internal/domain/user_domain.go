@@ -59,6 +59,12 @@ type UserJwtInformation struct {
 	UserID primitive.ObjectID `json:"userID" bson:"_userID"`
 	Email  string             `json:"email" bson:"email"`
 }
+type UserUpdateMainInfo struct {
+	FirstName   string `json:"firstName" bson:"firstName"`
+	LastName    string `json:"lastName" bson:"lastName"`
+	DateOfBirth string `json:"dateOfBirth" bson:"dateOfBirth"`
+	ProfileUrl  string `json:"profileUrl" bson:"profileUrl"`
+}
 
 type UserInterface interface {
 	InsertUser(context.Context, interface{}) (interface{}, error)

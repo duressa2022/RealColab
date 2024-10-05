@@ -22,6 +22,41 @@ func NewUserController(env *config.Env, userUsecase *usecase.UserUseCase) *UserC
 	}
 }
 
+// update profile handler
+func (uc *UserController) UpdateMainInfo(c *gin.Context) {
+	var updateUser *domain.UserUpdateMainInfo
+	if err := c.BindJSON(&updateUser); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error(), "data": nil})
+		return
+	}
+
+	Id, exist := c.Get("id")
+	if !exist {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "not found email", "success": false, "data": nil})
+		return
+	}
+
+	userid,okay:=Id.(string)
+	if !okay{
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "data type erro", "success": false, "data": nil})
+		return
+	}
+	
+	updatedUser, err := uc.UserUseCase.UpdateMainInfo(c, updateUser, userid)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error(), "success": false, "data": nil})
+		return
+	}
+
+	response := map[string]interface{}{
+		"success": true,
+		"message": "updated",
+		"data":    updatedUser,
+	}
+	c.IndentedJSON(http.StatusOK, response)
+
+}
+
 // registration handler
 func (uc *UserController) RegisterUser(c *gin.Context) {
 	var userInformation *domain.UserRegistrationRequest
@@ -44,39 +79,39 @@ func (uc *UserController) RegisterUser(c *gin.Context) {
 }
 
 // handler for working with login
-func (uc *UserController) Login(c *gin.Context){
+func (uc *UserController) Login(c *gin.Context) {
 	var login *domain.LoginRequest
-	if err:=c.BindJSON(&login);err!=nil{
-		c.IndentedJSON(http.StatusBadRequest,gin.H{"success":false,"message":"error of data","data":nil})
-		return 
+	if err := c.BindJSON(&login); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"success": false, "message": "error of data", "data": nil})
+		return
 	}
 
-	userInformation,err:=uc.UserUseCase.LoginUser(c,login)
-	if err!=nil{
-		c.IndentedJSON(http.StatusInternalServerError,gin.H{"success":false,"message":err.Error(),"data":nil})
-		return 
+	userInformation, err := uc.UserUseCase.LoginUser(c, login)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"success": false, "message": err.Error(), "data": nil})
+		return
 	}
 
-	accessToken,err:=tokens.CreateAccessToken(userInformation,uc.Env.AccessTokenSecret,uc.Env.AccessTokenExpiryHour)
-	if err!=nil{
-		c.IndentedJSON(http.StatusInternalServerError,gin.H{"success":false,"message":err.Error(),"data":nil})
-		return 
+	accessToken, err := tokens.CreateAccessToken(userInformation, uc.Env.AccessTokenSecret, uc.Env.AccessTokenExpiryHour)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"success": false, "message": err.Error(), "data": nil})
+		return
 	}
 
-	refreshToken,err:=tokens.CreateRefreshToken(userInformation,uc.Env.RefreshTokenSecret,uc.Env.RefreshTokenExpiryHour)
-	if err!=nil{
-		c.IndentedJSON(http.StatusInternalServerError,gin.H{"success":false,"message":err.Error(),"data":nil})
-		return 
+	refreshToken, err := tokens.CreateRefreshToken(userInformation, uc.Env.RefreshTokenSecret, uc.Env.RefreshTokenExpiryHour)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"success": false, "message": err.Error(), "data": nil})
+		return
 	}
-	c.SetCookie("accessToken",accessToken,uc.Env.AccessTokenExpiryHour,"","",true,true)
-	c.SetCookie("refreshToken",refreshToken,uc.Env.RefreshTokenExpiryHour,"","",true,true)
+	c.SetCookie("accessToken", accessToken, uc.Env.AccessTokenExpiryHour, "", "", true, true)
+	c.SetCookie("refreshToken", refreshToken, uc.Env.RefreshTokenExpiryHour, "", "", true, true)
 
-	response:=map[string]interface{}{
-		"accessToken":accessToken,
-		"refreshToken":refreshToken,
-		"success":true,
-		"message":"login in Succcesful",
-		"data":map[string]interface{}{},
+	response := map[string]interface{}{
+		"accessToken":  accessToken,
+		"refreshToken": refreshToken,
+		"success":      true,
+		"message":      "login in Succcesful",
+		"data":         map[string]interface{}{},
 	}
-	c.IndentedJSON(http.StatusOK,response)
+	c.IndentedJSON(http.StatusOK, response)
 }

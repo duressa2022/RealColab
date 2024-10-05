@@ -23,6 +23,12 @@ func NewUserUseCase(userrepository *repository.UserRepository, timout time.Durat
 	}
 }
 
+// method for updating user main info
+func (uu *UserUseCase) UpdateMainInfo(cxt context.Context, userInfo *domain.UserUpdateMainInfo, userID string) (*domain.UserUpdateMainInfo, error) {
+	return uu.UserRepository.UpdateMain(cxt, userInfo, userID)
+
+}
+
 // method for regestering user into the system
 func (uu *UserUseCase) RegisterUser(cxt context.Context, user *domain.UserRegistrationRequest) (*domain.UserResponse, error) {
 	_, err := uu.UserRepository.GetUserByEmail(cxt, user.Email)
