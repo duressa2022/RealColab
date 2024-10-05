@@ -9,10 +9,10 @@ import (
 )
 
 // method for creating access token
-func CreateAccessToken(user *domain.UserJwtInformation, secret string, exp int) (string, error) {
+func CreateAccessToken(user *domain.UserInformation, secret string, exp int) (string, error) {
 	expirationTime := time.Now().Add(time.Duration(exp) * time.Second)
 	claims := domain.Claims{
-		Username: user.Email,
+		Email: user.Email,
 		ID:       user.UserID.Hex(),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
@@ -23,7 +23,7 @@ func CreateAccessToken(user *domain.UserJwtInformation, secret string, exp int) 
 }
 
 // method for creating refresh token
-func CreateRefreshToken(user *domain.UserJwtInformation, secret string, exp int) (string, error) {
+func CreateRefreshToken(user *domain.UserInformation, secret string, exp int) (string, error) {
 	expirationTime := time.Now().Add(time.Duration(exp) * time.Second)
 	claims := domain.RefreshClaims{
 		ID: user.UserID.Hex(),
@@ -56,8 +56,8 @@ func VerifyToken(token string, secret string) (bool, error) {
 	return true, nil
 }
 
-// method for getting username from the token
-func GetUserName(token string, secret string) (string, error) {
+// method for getting email from the token
+func GetUserEmail(token string, secret string) (string, error) {
 	tokenString, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("error for method checking")
@@ -74,9 +74,9 @@ func GetUserName(token string, secret string) (string, error) {
 	}
 
 	// Safely access "username"
-	username, ok := claims["username"].(string)
+	username, ok := claims["email"].(string)
 	if !ok {
-		return "", errors.New("username not found in token claims")
+		return "", errors.New("email not found in token claims")
 	}
 
 	return username, nil

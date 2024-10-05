@@ -1,8 +1,9 @@
 package domain
 
 type LoginRequest struct {
-	Email string `json:"email" bson:"email"`
-	Password string `json:"password" bson:"password"`
+	Email       string `json:"email" bson:"email"`
+	Password    string `json:"password" bson:"password"`
+	PhoneNumber string `json:"phoneNumber" bson:"phoneNumber"`
 }
 
 type LoginResponse struct {
@@ -14,5 +15,3 @@ type ChangePassword struct {
 	Password    string `json:"password" bson:"password"`
 	NewPassword string `json:"newPassword" bson:"newpassword"`
 }
-
-

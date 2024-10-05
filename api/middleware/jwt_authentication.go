@@ -45,8 +45,8 @@ func JwtAuthMiddleWare(secret string) gin.HandlerFunc {
 			return
 		}
 
-		if username, ok := claims["username"]; ok {
-			c.Set("username", username)
+		if email, ok := claims["email"]; ok {
+			c.Set("username", email)
 		} else {
 			c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "Username not found in token claims"})
 			c.Abort()

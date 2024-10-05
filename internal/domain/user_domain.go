@@ -44,8 +44,15 @@ type UserResponse struct {
 	DateOfBirth     string                   `json:"dateOfBirth" bson:"dateOfBirth"`
 	ProfileUrl      string                   `json:"profileUrl" bson:"profileUrl"`
 	Rating          []map[string]interface{} `json:"rating" bson:"rating"`
-	TaskInformation []map[string]int         `json:"taskInformation" bson:"taskInformation"`
+	TaskInformation TaskInformation          `json:"taskInformation" bson:"taskInformation"`
 	TwostepVer      bool                     `json:"twoStepVer" bson:"twoStepVer"`
+}
+type TaskInformation struct {
+	Completed  int `json:"completed" bson:"completed"`
+	OnProgress int `json:"onProgress" bson:"onProgress"`
+	AllTasks   int `json:"allTasks" bson:"allTasks"`
+	Expired    int `json:"expired" bson:"expired"`
+	Archived   int `json:"archived" bson:"archived"`
 }
 
 type UserJwtInformation struct {

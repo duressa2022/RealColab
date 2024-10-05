@@ -17,10 +17,11 @@ import (
 func initPublicUserRoutes(env *config.Env, timeout time.Duration, db mongo.Database, group *gin.RouterGroup) {
 	ur := repository.NewUserRepository(domain.CollectionUser, db)
 	uc := controller.UserController{
-		UserUseCase: usecase.NewUserUseCase(ur,timeout),
+		UserUseCase: usecase.NewUserUseCase(ur, timeout),
 		Env:         env,
 	}
 	group.POST("/register", uc.RegisterUser)
+	group.POST("/login", uc.Login)
 }
 
 // method for init protected for user

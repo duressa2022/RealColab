@@ -48,3 +48,25 @@ func (ur *UserRepository) GetUserByEmail(cxt context.Context, email string) (*do
 	return userReponse, nil
 
 }
+
+// method for getting user by using email
+func (ur *UserRepository) GetUserByEmailLogin(cxt context.Context, email string) (*domain.UserInformation, error) {
+	userCollection := ur.database.Collection(ur.collection)
+	var userReponse *domain.UserInformation
+	err := userCollection.FindOne(cxt, bson.D{{Key: "email", Value: email}}).Decode(&userReponse)
+	if err != nil {
+		return nil, err
+	}
+	return userReponse, nil
+}
+
+// method for getting user by using phone
+func (ur *UserRepository) GetUserByPhone(cxt context.Context, phone string) (*domain.UserInformation, error) {
+	userCollection := ur.database.Collection(ur.collection)
+	var userReponse *domain.UserInformation
+	err := userCollection.FindOne(cxt, bson.D{{Key: "phoneNumber", Value: phone}}).Decode(&userReponse)
+	if err != nil {
+		return nil, err
+	}
+	return userReponse, nil
+}
