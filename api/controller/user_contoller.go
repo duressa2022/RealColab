@@ -22,6 +22,131 @@ func NewUserController(env *config.Env, userUsecase *usecase.UserUseCase) *UserC
 	}
 }
 
+// method for updating notification choice
+func (uc *UserController) UpdateNotificationChoice(c *gin.Context) {
+	Id, exist := c.Get("id")
+	if !exist {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "not found id of error", "success": false, "data": nil})
+		return
+	}
+
+	userid, okay := Id.(string)
+	if !okay {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "error of data", "success": false, "data": nil})
+		return
+	}
+
+	var change *domain.NotificationPreference
+	if err := c.BindJSON(&change); err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "not found", "data": nil, "success": true})
+		return
+	}
+
+	changed, err := uc.UserUseCase.UpdateNotificationChoice(c, change, userid)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "not found", "data": nil, "success": true})
+		return
+	}
+
+	response := map[string]interface{}{
+		"success": true,
+		"message": "updated",
+		"data":    changed,
+	}
+	c.IndentedJSON(http.StatusOK, response)
+}
+
+// method for getting notification choice
+func (uc *UserController) GetNotificationChoice(c *gin.Context) {
+	Id, exist := c.Get("id")
+	if !exist {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "not found id of error", "success": false, "data": nil})
+		return
+	}
+
+	userid, okay := Id.(string)
+	if !okay {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "error of data", "success": false, "data": nil})
+		return
+	}
+
+	notification, err := uc.UserUseCase.GetNotificationChoice(c, userid)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "success": true, "data": nil})
+		return
+	}
+
+	response := map[string]interface{}{
+		"success": true,
+		"message": "data",
+		"data":    notification,
+	}
+	c.IndentedJSON(http.StatusOK, response)
+
+}
+
+// method for changing password
+func (uc *UserController) ChangePassword(c *gin.Context) {
+	Id, exist := c.Get("id")
+	if !exist {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "not found id of error", "success": false, "data": nil})
+		return
+	}
+
+	var changeInfo *domain.ChangePassword
+	if err := c.BindJSON(&changeInfo); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false, "data": nil})
+		return
+	}
+
+	userid, okay := Id.(string)
+	if !okay {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "error of data", "success": false, "data": nil})
+		return
+	}
+
+	err := uc.UserUseCase.ChangePassword(c, changeInfo, userid)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error(), "success": false, "data": nil})
+		return
+	}
+	response := map[string]interface{}{
+		"success": true,
+		"message": "changed",
+		"data":    nil,
+	}
+	c.IndentedJSON(http.StatusOK, response)
+
+}
+
+// get user security information
+func (uc *UserController) GetSecurityInfo(c *gin.Context) {
+	Id, exist := c.Get("id")
+	if !exist {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "not found id of error", "success": false, "data": nil})
+		return
+	}
+
+	userid, okay := Id.(string)
+	if !okay {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "not found id of error", "success": false, "data": nil})
+		return
+	}
+
+	userSecurity, err := uc.UserUseCase.GetSecurityInfo(c, userid)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error(), "success": false, "data": nil})
+		return
+	}
+
+	response := map[string]interface{}{
+		"success": true,
+		"message": "message got",
+		"data":    userSecurity,
+	}
+	c.IndentedJSON(http.StatusOK, response)
+}
+
 // update profile handler
 func (uc *UserController) UpdateMainInfo(c *gin.Context) {
 	var updateUser *domain.UserUpdateMainInfo
@@ -36,12 +161,12 @@ func (uc *UserController) UpdateMainInfo(c *gin.Context) {
 		return
 	}
 
-	userid,okay:=Id.(string)
-	if !okay{
+	userid, okay := Id.(string)
+	if !okay {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "data type erro", "success": false, "data": nil})
 		return
 	}
-	
+
 	updatedUser, err := uc.UserUseCase.UpdateMainInfo(c, updateUser, userid)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error(), "success": false, "data": nil})

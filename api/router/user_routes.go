@@ -23,6 +23,10 @@ func initPublicUserRoutes(env *config.Env, timeout time.Duration, db mongo.Datab
 	group.POST("/register", uc.RegisterUser)
 	group.POST("/login", uc.Login)
 	group.POST("/updateMain", uc.UpdateMainInfo)
+	group.GET("/secure_information", uc.GetSecurityInfo)
+	group.PUT("/changepassword", uc.ChangePassword)
+	group.GET("/", uc.GetNotificationChoice)
+	group.PUT("/", uc.UpdateNotificationChoice)
 }
 
 // method for init protected for user

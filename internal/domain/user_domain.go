@@ -36,16 +36,17 @@ type UserRegistrationRequest struct {
 }
 
 type UserResponse struct {
-	UserID          primitive.ObjectID       `json:"userID" bson:"_userID"`
-	FirstName       string                   `json:"firstName" bson:"firstName"`
-	LastName        string                   `json:"lastName" bson:"lastName"`
-	Email           string                   `json:"email" bson:"email"`
-	PhoneNumber     string                   `json:"phoneNumber" bson:"phoneNumber"`
-	DateOfBirth     string                   `json:"dateOfBirth" bson:"dateOfBirth"`
-	ProfileUrl      string                   `json:"profileUrl" bson:"profileUrl"`
-	Rating          []map[string]interface{} `json:"rating" bson:"rating"`
-	TaskInformation TaskInformation          `json:"taskInformation" bson:"taskInformation"`
-	TwostepVer      bool                     `json:"twoStepVer" bson:"twoStepVer"`
+	UserID             primitive.ObjectID       `json:"userID" bson:"_userID"`
+	FirstName          string                   `json:"firstName" bson:"firstName"`
+	LastName           string                   `json:"lastName" bson:"lastName"`
+	Email              string                   `json:"email" bson:"email"`
+	PhoneNumber        string                   `json:"phoneNumber" bson:"phoneNumber"`
+	DateOfBirth        string                   `json:"dateOfBirth" bson:"dateOfBirth"`
+	ProfileUrl         string                   `json:"profileUrl" bson:"profileUrl"`
+	Rating             []map[string]interface{} `json:"rating" bson:"rating"`
+	TaskInformation    TaskInformation          `json:"taskInformation" bson:"taskInformation"`
+	TwostepVer         bool                     `json:"twoStepVer" bson:"twoStepVer"`
+	NotificationChoice NotificationPreference   `json:"notificationChoice" bson:"notificationChoice"`
 }
 type TaskInformation struct {
 	Completed  int `json:"completed" bson:"completed"`
@@ -64,6 +65,15 @@ type UserUpdateMainInfo struct {
 	LastName    string `json:"lastName" bson:"lastName"`
 	DateOfBirth string `json:"dateOfBirth" bson:"dateOfBirth"`
 	ProfileUrl  string `json:"profileUrl" bson:"profileUrl"`
+}
+type UserSecurityInfo struct {
+	Email       string `json:"email" bson:"email"`
+	PhoneNumber string `json:"phoneNumber" bson:"phoneNumber"`
+	TwostepVer  bool   `json:"twoStepVer" bson:"twoStepVer"`
+}
+type NotificationPreference struct {
+	ChooseEmail    bool `json:"chooseEmail" bson:"chooseEmail"`
+	ChooseSuperApp bool `json:"chooseSuperApp" bson:"chooseSuper"`
 }
 
 type UserInterface interface {

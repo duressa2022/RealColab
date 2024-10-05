@@ -23,6 +23,30 @@ func NewUserUseCase(userrepository *repository.UserRepository, timout time.Durat
 	}
 }
 
+// method for getting notification choice
+func (uu *UserUseCase)GetNotificationChoice(cxt context.Context,Id string)(*domain.NotificationPreference,error){
+	return uu.UserRepository.GetNotificationChoice(cxt,Id)
+}
+// method for updating notification choice
+func (uu *UserUseCase)UpdateNotificationChoice(cxt context.Context,change *domain.NotificationPreference,id string)(*domain.NotificationPreference,error){
+	return uu.UserRepository.UpdateNotificationChoice(cxt,change,id)
+}
+
+// method for changing password
+func (uu *UserUseCase) ChangePassword(cxt context.Context, Pass *domain.ChangePassword, Id string) error {
+	hashed, err := bcrypt.GenerateFromPassword([]byte(Pass.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	Pass.NewPassword = string(hashed)
+	return uu.UserRepository.UpdatePassword(cxt, Pass, Id)
+}
+
+// method for getting user security information
+func (uu *UserUseCase) GetSecurityInfo(cxt context.Context, Id string) (*domain.UserSecurityInfo, error) {
+	return uu.UserRepository.GetSecurityInfo(cxt, Id)
+}
+
 // method for updating user main info
 func (uu *UserUseCase) UpdateMainInfo(cxt context.Context, userInfo *domain.UserUpdateMainInfo, userID string) (*domain.UserUpdateMainInfo, error) {
 	return uu.UserRepository.UpdateMain(cxt, userInfo, userID)
