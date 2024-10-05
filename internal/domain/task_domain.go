@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	TaskCollection="tasks"
+	TaskCollection = "tasks"
 )
 
 type Task struct {
@@ -23,10 +23,32 @@ type Task struct {
 	Members     []*UserInformation `json:"members" bson:"members" `
 }
 
-type EditTask struct{
+type PrivateTask struct {
+	TaskID      primitive.ObjectID `json:"taskID" bson:"_taskID"`
+	UserID      primitive.ObjectID `json:"userID" bson:"_userID"`
 	Title       string             `json:"title" bson:"title"`
+	StartDate   time.Time          `json:"startDate" bson:"startDate"`
+	DueDate     time.Time          `json:"dueDate" bson:"dueDate"`
 	TimePerDay  int64              `json:"timePerDay" bson:"timePerDay"`
 	Description string             `json:"description" bson:"description" `
-	Type        string             `json:"type" bson:"type"`
+	Status      string             `json:"status" bson:"status"`
 }
 
+type SharedTask struct {
+	TaskID      primitive.ObjectID   `json:"taskID" bson:"_taskID"`
+	UserID      primitive.ObjectID   `json:"userID" bson:"_userID"`
+	Title       string               `json:"title" bson:"title"`
+	StartDate   time.Time            `json:"startDate" bson:"startDate"`
+	DueDate     time.Time            `json:"dueDate" bson:"dueDate"`
+	TimePerDay  int64                `json:"timePerDay" bson:"timePerDay"`
+	Description string               `json:"description" bson:"description" `
+	Status      string               `json:"status" bson:"status"`
+	Members     []primitive.ObjectID `json:"members" bson:"members" `
+}
+
+type EditTask struct {
+	Title       string `json:"title" bson:"title"`
+	TimePerDay  int64  `json:"timePerDay" bson:"timePerDay"`
+	Description string `json:"description" bson:"description" `
+	Type        string `json:"type" bson:"type"`
+}
