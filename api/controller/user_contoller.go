@@ -192,7 +192,7 @@ func (uc *UserController) RegisterUser(c *gin.Context) {
 
 	createdUser, err := uc.UserUseCase.RegisterUser(c, userInformation)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"success": false, "message": err, "data": nil})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"success": false, "message": err.Error(), "data": nil})
 		return
 	}
 	response := map[string]interface{}{

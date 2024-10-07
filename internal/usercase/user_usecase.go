@@ -24,12 +24,13 @@ func NewUserUseCase(userrepository *repository.UserRepository, timout time.Durat
 }
 
 // method for getting notification choice
-func (uu *UserUseCase)GetNotificationChoice(cxt context.Context,Id string)(*domain.NotificationPreference,error){
-	return uu.UserRepository.GetNotificationChoice(cxt,Id)
+func (uu *UserUseCase) GetNotificationChoice(cxt context.Context, Id string) (*domain.NotificationPreference, error) {
+	return uu.UserRepository.GetNotificationChoice(cxt, Id)
 }
+
 // method for updating notification choice
-func (uu *UserUseCase)UpdateNotificationChoice(cxt context.Context,change *domain.NotificationPreference,id string)(*domain.NotificationPreference,error){
-	return uu.UserRepository.UpdateNotificationChoice(cxt,change,id)
+func (uu *UserUseCase) UpdateNotificationChoice(cxt context.Context, change *domain.NotificationPreference, id string) (*domain.NotificationPreference, error) {
+	return uu.UserRepository.UpdateNotificationChoice(cxt, change, id)
 }
 
 // method for changing password
@@ -81,33 +82,13 @@ func (uu *UserUseCase) RegisterUser(cxt context.Context, user *domain.UserRegist
 
 // method for login into the system
 func (uc *UserUseCase) LoginUser(cxt context.Context, login *domain.LoginRequest) (*domain.UserInformation, error) {
-	if login.Email == "" && login.PhoneNumber == "" {
-		return nil, errors.New("error of data you provided")
+	user, err := uc.UserRepository.GetUserByEmailLogin(cxt, login.Email)
+	if err != nil {
+		return nil, err
 	}
-
-	if login.Email != "" {
-		user, err := uc.UserRepository.GetUserByEmailLogin(cxt, login.Email)
-		if err != nil {
-			return nil, err
-		}
-		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
-		if err != nil {
-			return nil, errors.New("not correct password")
-		}
-		return user, nil
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
+	if err != nil {
+		return nil, errors.New("not correct password")
 	}
-
-	if login.PhoneNumber != "" {
-		user, err := uc.UserRepository.GetUserByPhone(cxt, login.PhoneNumber)
-		if err != nil {
-			return nil, err
-		}
-		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
-		if err != nil {
-			return nil, errors.New("not correct password")
-		}
-		return user, nil
-	}
-
-	return nil, errors.New("error of unknown type")
+	return user, nil
 }

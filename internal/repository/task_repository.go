@@ -67,22 +67,22 @@ func (tr *TaskRepository) TaskInformation(cxt context.Context, ID string) (map[s
 }
 
 // method for getting recently compeleted tasks
-func (tr *TaskRepository) GetRecentlyCompletedTasks(cxt context.Context, ID string) ([]*domain.Task, error) {
-	var recentlyCompeltedTasks []*domain.Task
+func (tr *TaskRepository) GetRecentlyCompletedTasks(cxt context.Context, ID string) ([]*domain.PrivateTask, error) {
+	var recentlyCompeltedTasks []*domain.PrivateTask
 	taskCollection := tr.database.Collection(tr.collection)
 
-	taskid, err := primitive.ObjectIDFromHex(ID)
+	userid, err := primitive.ObjectIDFromHex(ID)
 	if err != nil {
 		return nil, err
 	}
 
-	cursor, err := taskCollection.Find(cxt, bson.D{{Key: "status", Value: "compeleted"}, {Key: "taskID", Value: taskid}})
+	cursor, err := taskCollection.Find(cxt, bson.D{{Key: "status", Value: "compeleted"}, {Key: "userID", Value: userid}})
 	if err != nil {
 		return nil, err
 	}
 
 	for cursor.Next(cxt) {
-		var task *domain.Task
+		var task *domain.PrivateTask
 		err := cursor.Decode(&task)
 		if err != nil {
 			return nil, err
@@ -98,11 +98,11 @@ func (tr *TaskRepository) GetUpComingTasks(cxt context.Context, Id string) ([]*d
 	taskCollection := tr.database.Collection(tr.collection)
 	opts := options.Find().SetSort(bson.D{{Key: "dueDate", Value: 1}})
 
-	taskid, err := primitive.ObjectIDFromHex(Id)
+	userid, err := primitive.ObjectIDFromHex(Id)
 	if err != nil {
 		return nil, err
 	}
-	cursor, err := taskCollection.Find(cxt, bson.D{{Key: "status", Value: "ongoing"}, {Key: "taskID", Value: taskid}}, opts)
+	cursor, err := taskCollection.Find(cxt, bson.D{{Key: "status", Value: "ongoing"}, {Key: "_userID", Value: userid}}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -253,7 +253,7 @@ func (tr *TaskRepository) GetPrivateTasks(cxt context.Context, ID string, size i
 		return nil, 0, err
 	}
 
-	curser, err := taskCollection.Find(cxt, bson.D{{Key: "_userID", Value: userId}}, opts)
+	curser, err := taskCollection.Find(cxt, bson.D{{Key: "_userID", Value: userId}, {Key: "type", Value: "private"}, {Key: "status", Value: "ongoing"}}, opts)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -267,7 +267,7 @@ func (tr *TaskRepository) GetPrivateTasks(cxt context.Context, ID string, size i
 		privateTask = append(privateTask, task)
 	}
 
-	numberOfDocs, err := taskCollection.CountDocuments(cxt, bson.D{{Key: "_userID", Value: userId}})
+	numberOfDocs, err := taskCollection.CountDocuments(cxt, bson.D{{Key: "_userID", Value: userId}, {Key: "type", Value: "private"}})
 	if err != nil {
 		return nil, 0, err
 	}
@@ -275,7 +275,7 @@ func (tr *TaskRepository) GetPrivateTasks(cxt context.Context, ID string, size i
 }
 
 // method for updating tasks
-func (tr *TaskRepository) EditTask(cxt context.Context, task domain.EditTask, ID string) (*domain.Task, error) {
+func (tr *TaskRepository) EditTask(cxt context.Context, task *domain.EditTask, ID string) (*domain.Task, error) {
 	taskcollection := tr.database.Collection(tr.collection)
 	task_id, err := primitive.ObjectIDFromHex(ID)
 	if err != nil {
@@ -289,7 +289,7 @@ func (tr *TaskRepository) EditTask(cxt context.Context, task domain.EditTask, ID
 		"description": task.Description,
 	}
 
-	updatedResult, err := taskcollection.UpdateOne(cxt, bson.D{{Key: "_taskID", Value: task_id}}, bson.D{{Key: "$set", Value: updatingValue}})
+	updatedResult, err := taskcollection.UpdateOne(cxt, bson.D{{Key: "_taskID", Value: task_id}, {Key: "status", Value: "ongoing"}}, bson.D{{Key: "$set", Value: updatingValue}})
 	if err != nil {
 		return nil, err
 	}
@@ -333,12 +333,73 @@ func (tr *TaskRepository) ArchiveTask(cxt context.Context, taskID string) error 
 	return nil
 }
 
+// method for searching tasks by title
+func (tr *TaskRepository) SearchTask(cxt context.Context, searchTerm string, page int64, size int64) ([]*domain.Task, int64, error) {
+	var searchResult []*domain.Task
+	taskCollection := tr.database.Collection(tr.collection)
+	skip := (page - 1) / size
+	opts := options.Find().SetSkip(skip).SetLimit(size)
+	filter := bson.D{
+		{Key: "$or", Value: bson.A{
+			bson.D{{Key: "title", Value: bson.D{{Key: "$regex", Value: searchTerm}, {Key: "$options", Value: "i"}}}},
+			bson.D{{Key: "description", Value: bson.D{{Key: "$regex", Value: searchTerm}, {Key: "$options", Value: "i"}}}}},
+		}, {Key: "status", Value: "ongoing"},
+	}
+
+	cursor, err := taskCollection.Find(cxt, filter, opts)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	for cursor.Next(cxt) {
+		var task *domain.Task
+		err := cursor.Decode(&task)
+		if err != nil {
+			return nil, 0, err
+		}
+		searchResult = append(searchResult, task)
+	}
+
+	totalResult, err := taskCollection.CountDocuments(cxt, filter)
+	if err != nil {
+		return nil, 0, err
+	}
+	return searchResult, totalResult, nil
+
+}
+
 // method for creating new task
-func (tr *TaskRepository) PostTask(cxt context.Context, task *domain.TaskInformation) (*domain.TaskInformation, error) {
+func (tr *TaskRepository) PostTask(cxt context.Context, task *domain.Task) (*domain.Task, error) {
 	taskCollection := tr.database.Collection(tr.collection)
 	_, err := taskCollection.InsertOne(cxt, task)
 	if err != nil {
 		return nil, err
 	}
 	return task, nil
+}
+
+// method for getting compeleted tasks based on userid
+func (tr *TaskRepository) GetTaskByCriteria(cxt context.Context, criteria string, Id string, limit int64) ([]string, error) {
+	var completedResult []string
+	taskCollection := tr.database.Collection(tr.collection)
+	opts := options.Find().SetLimit(limit)
+
+	userID, err := primitive.ObjectIDFromHex(Id)
+	if err != nil {
+		return nil, err
+	}
+	cursor, err := taskCollection.Find(cxt, bson.D{{Key: "_userID", Value: userID}, {Key: "status", Value: criteria}}, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	for cursor.Next(cxt) {
+		var task *domain.Task
+		err := cursor.Decode(&task)
+		if err != nil {
+			return nil, err
+		}
+		completedResult = append(completedResult, task.Description)
+	}
+	return completedResult, nil
 }

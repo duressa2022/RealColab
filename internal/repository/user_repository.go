@@ -51,19 +51,19 @@ func (ur *UserRepository) UpdateNotificationChoice(cxt context.Context, change *
 		"chooseSuperApp": change.ChooseSuperApp,
 	}
 
-	updatedResult,err:=userCollection.UpdateOne(cxt,bson.D{{Key: "_userID",Value: userid}},bson.D{{Key: "$set",Value: updating}})
-	if err!=nil{
-		return nil,err
+	updatedResult, err := userCollection.UpdateOne(cxt, bson.D{{Key: "_userID", Value: userid}}, bson.D{{Key: "$set", Value: updating}})
+	if err != nil {
+		return nil, err
 	}
 
-	if updatedResult.ModifiedCount==0{
-		return nil,errors.New("no modified data")
+	if updatedResult.ModifiedCount == 0 {
+		return nil, errors.New("no modified data")
 	}
-	if updatedResult.MatchedCount==0{
-		return nil,errors.New("no matched docs")
+	if updatedResult.MatchedCount == 0 {
+		return nil, errors.New("no matched docs")
 	}
 
-	return change,err
+	return change, err
 }
 
 // method for updating user password
@@ -194,4 +194,22 @@ func (ur *UserRepository) GetUserByPhone(cxt context.Context, phone string) (*do
 		return nil, err
 	}
 	return userReponse, nil
+}
+
+// method for getting user by using use id
+func (ur *UserRepository) GetUserByID(cxt context.Context, ID string) (*domain.UserResponse, error) {
+	userCollection := ur.database.Collection(ur.collection)
+
+	userID, err := primitive.ObjectIDFromHex(ID)
+	if err != nil {
+		return nil, err
+	}
+
+	var userReponse *domain.UserResponse
+	err = userCollection.FindOne(cxt, bson.D{{Key: "_userID", Value: userID}}).Decode(&userReponse)
+	if err != nil {
+		return nil, err
+	}
+	return userReponse, nil
+
 }

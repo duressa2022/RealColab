@@ -36,17 +36,21 @@ type UserRegistrationRequest struct {
 }
 
 type UserResponse struct {
-	UserID             primitive.ObjectID       `json:"userID" bson:"_userID"`
-	FirstName          string                   `json:"firstName" bson:"firstName"`
-	LastName           string                   `json:"lastName" bson:"lastName"`
-	Email              string                   `json:"email" bson:"email"`
-	PhoneNumber        string                   `json:"phoneNumber" bson:"phoneNumber"`
-	DateOfBirth        string                   `json:"dateOfBirth" bson:"dateOfBirth"`
-	ProfileUrl         string                   `json:"profileUrl" bson:"profileUrl"`
-	Rating             []map[string]interface{} `json:"rating" bson:"rating"`
-	TaskInformation    TaskInformation          `json:"taskInformation" bson:"taskInformation"`
-	TwostepVer         bool                     `json:"twoStepVer" bson:"twoStepVer"`
-	NotificationChoice NotificationPreference   `json:"notificationChoice" bson:"notificationChoice"`
+	UserID             primitive.ObjectID     `json:"userID" bson:"_userID"`
+	FirstName          string                 `json:"firstName" bson:"firstName"`
+	LastName           string                 `json:"lastName" bson:"lastName"`
+	Email              string                 `json:"email" bson:"email"`
+	PhoneNumber        string                 `json:"phoneNumber" bson:"phoneNumber"`
+	DateOfBirth        string                 `json:"dateOfBirth" bson:"dateOfBirth"`
+	ProfileUrl         string                 `json:"profileUrl" bson:"profileUrl"`
+	Rating             UserRating             `json:"rating" bson:"rating"`
+	TaskInformation    TaskInformation        `json:"taskInformation" bson:"taskInformation"`
+	TwostepVer         bool                   `json:"twoStepVer" bson:"twoStepVer"`
+	NotificationChoice NotificationPreference `json:"notificationChoice" bson:"notificationChoice"`
+}
+type UserRating struct {
+	Rating int    `json:"rating" bson:"rating"`
+	Level  string `json:"leval" bson:"level"`
 }
 type TaskInformation struct {
 	Completed  int `json:"completed" bson:"completed"`

@@ -22,7 +22,7 @@ type Env struct {
 	AccessTokenSecret      string `mapstructure:"ACCESS_TOKEN_SECRET"`
 	RefreshTokenSecret     string `mapstructure:"REFRESH_TOKEN_SECRET"`
 	URL                    string `mapstructure:"URL"`
-	API                    string `mapstructure:"API"`
+	GEMINI_API             string `mapstructure:"GEMINI_API"`
 }
 
 // NewEnv creates and loads environment variables from .env file
