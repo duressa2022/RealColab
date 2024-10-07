@@ -185,3 +185,82 @@ func (tc *TaskController) SearchTaskHandler(c *gin.Context) {
 	}
 	c.IndentedJSON(http.StatusOK, response)
 }
+
+// handler for working with the archived tasks
+func (tc *TaskController) GetArchivedTasksHandler(c *gin.Context) {
+	page := c.Query("page")
+	size := c.Query("Size")
+	ID, exist := c.Get("id")
+	if !exist {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "error of data", "success": false, "data": nil})
+		return
+	}
+
+	userID, ok := ID.(string)
+	if !ok {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "error of data type", "success": false, "data": nil})
+		return
+	}
+
+	pageNumber, err := strconv.Atoi(page)
+	if err != nil || pageNumber < 1 {
+		pageNumber = 1
+	}
+	sizeNumber, err := strconv.Atoi(size)
+	if err != nil || sizeNumber < 1 {
+		sizeNumber = 1
+	}
+
+	archived, numberTask, err := tc.TaskUseCase.GetArchivedTasks(c, userID, int64(pageNumber), int64(sizeNumber))
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "success": true, "gin": nil})
+		return
+	}
+	totalPage := (numberTask + int64(sizeNumber) - 1) / int64(sizeNumber)
+
+	response := map[string]interface{}{
+		"message": "archived tasks",
+		"success": true,
+		"content": map[string]interface{}{
+			"data":       archived,
+			"totalPages": totalPage,
+		},
+	}
+	c.IndentedJSON(http.StatusOK, response)
+}
+
+// handler for working with restore the archived tasks
+func (tc *TaskController) RestoreArchived(c *gin.Context) {
+	taskID := c.Param("taskID")
+
+	err := tc.TaskUseCase.RestoreArchived(c, taskID)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "success": false, "data": nil})
+		return
+	}
+	response := map[string]interface{}{
+		"message": "restored",
+		"success": true,
+		"data":    nil,
+	}
+	c.IndentedJSON(http.StatusOK, response)
+}
+
+// handler for working with the deleting the tasks
+func (tc *TaskController) DeleteArchived(c *gin.Context) {
+	taskID := c.Param("taskID")
+
+	err := tc.TaskUseCase.DeleteArchived(c, taskID)
+	if err != nil {
+		c.IndentedJSON(http.StatusOK, gin.H{"message": err.Error(), "success": false, "data": nil})
+		return
+	}
+
+	response := map[string]interface{}{
+		"message": "deleted",
+		"success": true,
+		"data":    nil,
+	}
+	c.IndentedJSON(http.StatusOK, response)
+
+}

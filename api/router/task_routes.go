@@ -23,5 +23,8 @@ func initProtectedTaskRoute(env *config.Env, timeout time.Duration, db mongo.Dat
 	group.PUT("/archive/:taskID", tc.ArchiveTaskHandler)
 	group.PUT("/edit/:taskID", tc.EditTaskHandler)
 	group.GET("/search", tc.SearchTaskHandler)
+	group.GET("/archived", tc.GetArchivedTasksHandler)
+	group.PUT("/restore/:taskID", tc.RestoreArchived)
+	group.DELETE("/delete/:taskID", tc.DeleteArchived)
 
 }

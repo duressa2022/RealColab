@@ -22,19 +22,19 @@ func initPublicUserRoutes(env *config.Env, timeout time.Duration, db mongo.Datab
 	}
 	group.POST("/register", uc.RegisterUser)
 	group.POST("/login", uc.Login)
-	group.POST("/updateMain", uc.UpdateMainInfo)
-	group.GET("/secure_information", uc.GetSecurityInfo)
-	group.PUT("/changepassword", uc.ChangePassword)
+
 	group.GET("/", uc.GetNotificationChoice)
 	group.PUT("/", uc.UpdateNotificationChoice)
 }
 
 // method for init protected for user
-//func initProtectedUserRoutes(env *config.Env, timeout time.Duration, db mongo.Database, group *gin.RouterGroup) {
-//	ur := repository.NewUserRepository(domain.CollectionUser, db)
-//	uc := controllers.UserController{
-//		UserUseCase: usecase.NewUserUseCase(timeout, ur),
-//		Env:         env,
-//	}
-
-//}
+func initProtectedUserRoutes(env *config.Env, timeout time.Duration, db mongo.Database, group *gin.RouterGroup) {
+	ur := repository.NewUserRepository(domain.CollectionUser, db)
+	uc := controller.UserController{
+		UserUseCase: usecase.NewUserUseCase(ur, timeout),
+		Env:         env,
+	}
+	group.PUT("/updateMain", uc.UpdateMainInfo)
+	group.GET("/secure_information", uc.GetSecurityInfo)
+	group.PUT("/changePassword", uc.ChangePassword)
+}

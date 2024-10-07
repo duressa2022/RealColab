@@ -61,6 +61,21 @@ func (tu *TaskUseCase) EditTask(cxt context.Context, task *domain.EditTask, Id s
 }
 
 // method for searching the task
-func (tu *TaskUseCase) SearchTask(cxt context.Context, searchTerm string, size int64, page int64) ([]*domain.Task,int64, error) {
+func (tu *TaskUseCase) SearchTask(cxt context.Context, searchTerm string, size int64, page int64) ([]*domain.Task, int64, error) {
 	return tu.TaskRepository.SearchTask(cxt, searchTerm, page, size)
+}
+
+// method for getting archived tasks
+func (tu *TaskUseCase) GetArchivedTasks(cxt context.Context, Id string, page int64, size int64) ([]*domain.Task, int64, error) {
+	return tu.TaskRepository.GetArchivedTasks(cxt, Id, size, page)
+}
+
+// method for restoring archived tasks
+func (tu *TaskUseCase) RestoreArchived(cxt context.Context, ID string) error {
+	return tu.TaskRepository.RestoreArchived(cxt, ID)
+}
+
+// method for deleting archived tasks
+func (tu *TaskUseCase) DeleteArchived(cxt context.Context, ID string) error {
+	return tu.TaskRepository.DeleteArchived(cxt, ID)
 }
