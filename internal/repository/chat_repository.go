@@ -15,6 +15,10 @@ type ChatRepository struct {
 	collection string
 }
 
+const (
+	limit=15
+)
+
 func NewChatRepository(database mongo.Database, collection string) *ChatRepository {
 	return &ChatRepository{
 		database:   database,
@@ -24,6 +28,7 @@ func NewChatRepository(database mongo.Database, collection string) *ChatReposito
 
 // method for creating or posting chat on the database
 func (cr *ChatRepository) CreateChat(cxt context.Context, message *domain.ChatMessage) (*domain.ChatMessage, error) {
+	cr.DeleteChats(cxt,message.UserID.String(),limit)
 	chatCollection := cr.database.Collection(cr.collection)
 	_, err := chatCollection.InsertOne(cxt, message)
 	if err != nil {
@@ -33,19 +38,15 @@ func (cr *ChatRepository) CreateChat(cxt context.Context, message *domain.ChatMe
 }
 
 // method for getting chat by using userid and chat id
-func (cr *ChatRepository) GetChatByID(cxt context.Context, UserID string, ChatID string) (*domain.ChatMessage, error) {
+func (cr *ChatRepository) GetChatByID(cxt context.Context,ChatID string) (*domain.ChatMessage, error) {
 	chatCollection := cr.database.Collection(cr.collection)
 
-	userid, err := primitive.ObjectIDFromHex(UserID)
-	if err != nil {
-		return nil, err
-	}
 	chatid, err := primitive.ObjectIDFromHex(ChatID)
 	if err != nil {
 		return nil, err
 	}
 
-	filter := bson.D{{Key: "_userID", Value: userid}, {Key: "_chatID", Value: chatid}}
+	filter := bson.D{{Key: "_chatID", Value: chatid}}
 	var response *domain.ChatMessage
 	err = chatCollection.FindOne(cxt, filter).Decode(&response)
 	if err != nil {

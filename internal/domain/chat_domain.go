@@ -20,9 +20,15 @@ type ChatMessage struct {
 }
 
 type ChatRequest struct {
-	Prompt string `json:"json" bson:"prompt"`
+	Prompt string `json:"prompt" bson:"prompt"`
 }
 type ChatResponse struct {
+	Prompt    string    `json:"prompt" bson:"prompt"`
+	Response  string    `json:"response" bson:"response"`
+	TimeStamp time.Time `json:"timeSatmp" bson:"timeStamp"`
+}
+
+type Message struct {
 	Prompt   string `json:"prompt" bson:"prompt"`
 	Response string `json:"response" bson:"response"`
 }
