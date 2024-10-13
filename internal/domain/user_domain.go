@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -12,18 +11,29 @@ const (
 )
 
 type UserInformation struct {
-	UserID          primitive.ObjectID       `json:"userID" bson:"_userID"`
-	FirstName       string                   `json:"firstName" bson:"firstName"`
-	LastName        string                   `json:"lastName" bson:"lastName"`
-	Email           string                   `json:"email" bson:"email"`
-	PhoneNumber     string                   `json:"phoneNumber" bson:"phoneNumber"`
-	Password        string                   `json:"password" bson:"password"`
-	DateOfBirth     string                   `json:"dateOfBirth" bson:"dateOfBirth"`
-	ProfileUrl      string                   `json:"profileUrl" bson:"profileUrl"`
-	Rating          []map[string]interface{} `json:"rating" bson:"rating"`
-	TaskInformation []map[string]int         `json:"taskInformation" bson:"taskInformation"`
-	TwostepVer      bool                     `json:"twoStepVer" bson:"twoStepVer"`
-	CreatedAt       time.Time                `json:"created" bson:"created"`
+	UserID          primitive.ObjectID  `json:"userID" bson:"_userID"`
+	FirstName       string              `json:"firstName" bson:"firstName"`
+	LastName        string              `json:"lastName" bson:"lastName"`
+	Email           string              `json:"email" bson:"email"`
+	UserName        string              `json:"username" bson:"username"`
+	PhoneNumber     string              `json:"phoneNumber" bson:"phoneNumber"`
+	Password        string              `json:"password" bson:"password"`
+	DateOfBirth     string              `json:"dateOfBirth" bson:"dateOfBirth"`
+	ProfileUrl      string              `json:"profileUrl" bson:"profileUrl"`
+	Status          string              `json:"status" bson:"status"`
+	IsVerified      bool                `json:"isVerified" bson:"isVerified"`
+	LastSeen        primitive.Timestamp `json:"lastSeen" bson:"lastSeen"`
+	Contacts        []*Contact          `json:"contacts" bson:"contacts"`
+	Rating          UserRating          `json:"rating" bson:"rating"`
+	TaskInformation TaskInformation     `json:"taskInformation" bson:"taskInformation"`
+	TwostepVer      bool                `json:"twoStepVer" bson:"twoStepVer"`
+	CreatedAt       primitive.Timestamp `json:"createdAt" bson:"created"`
+	UpdatedAt       primitive.Timestamp `json:"updatedAt" bson:"updatedAt"`
+}
+
+type Contact struct {
+	ContactID primitive.ObjectID `json:"contactID" bson:"_contactID"`
+	UserName  string             `json:"username" bson:"username"`
 }
 
 type UserRegistrationRequest struct {
@@ -36,17 +46,22 @@ type UserRegistrationRequest struct {
 }
 
 type UserResponse struct {
-	UserID             primitive.ObjectID     `json:"userID" bson:"_userID"`
-	FirstName          string                 `json:"firstName" bson:"firstName"`
-	LastName           string                 `json:"lastName" bson:"lastName"`
-	Email              string                 `json:"email" bson:"email"`
-	PhoneNumber        string                 `json:"phoneNumber" bson:"phoneNumber"`
-	DateOfBirth        string                 `json:"dateOfBirth" bson:"dateOfBirth"`
-	ProfileUrl         string                 `json:"profileUrl" bson:"profileUrl"`
-	Rating             UserRating             `json:"rating" bson:"rating"`
-	TaskInformation    TaskInformation        `json:"taskInformation" bson:"taskInformation"`
-	TwostepVer         bool                   `json:"twoStepVer" bson:"twoStepVer"`
-	NotificationChoice NotificationPreference `json:"notificationChoice" bson:"notificationChoice"`
+	FirstName       string              `json:"firstName" bson:"firstName"`
+	LastName        string              `json:"lastName" bson:"lastName"`
+	Email           string              `json:"email" bson:"email"`
+	UserName        string              `json:"username" bson:"username"`
+	PhoneNumber     string              `json:"phoneNumber" bson:"phoneNumber"`
+	DateOfBirth     string              `json:"dateOfBirth" bson:"dateOfBirth"`
+	ProfileUrl      string              `json:"profileUrl" bson:"profileUrl"`
+	Status          string              `json:"status" bson:"status"`
+	IsVerified      bool                `json:"isVerified" bson:"isVerified"`
+	LastSeen        primitive.Timestamp `json:"lastSeen" bson:"lastSeen"`
+	Contacts        []*Contact          `json:"contacts" bson:"contacts"`
+	Rating          UserRating          `json:"rating" bson:"rating"`
+	TaskInformation TaskInformation     `json:"taskInformation" bson:"taskInformation"`
+	TwostepVer      bool                `json:"twoStepVer" bson:"twoStepVer"`
+	CreatedAt       primitive.Timestamp `json:"createdAt" bson:"created"`
+	UpdatedAt       primitive.Timestamp `json:"updatedAt" bson:"updatedAt"`
 }
 type UserRating struct {
 	Rating int    `json:"rating" bson:"rating"`

@@ -75,7 +75,7 @@ func (uu *UserUseCase) RegisterUser(cxt context.Context, user *domain.UserRegist
 		return nil, err
 	}
 	createdUser.Password = string(hashed)
-	createdUser.CreatedAt = time.Now()
+	createdUser.CreatedAt = primitive.Timestamp{}
 
 	return uu.UserRepository.InsertUser(cxt, &createdUser)
 }

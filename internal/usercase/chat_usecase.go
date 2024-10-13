@@ -23,7 +23,7 @@ func NewChatUseCase(chat *repository.ChatRepository, timeout time.Duration) *Cha
 }
 
 // method for storing chat into the database
-func (cu *ChatUseCase) StoreChat(cxt context.Context, message *domain.Message, Id string) (*domain.ChatMessage, error) {
+func (cu *ChatUseCase) StoreChat(cxt context.Context, message *domain.RequestResponse, Id string) (*domain.ChatMessage, error) {
 	userID, err := primitive.ObjectIDFromHex(Id)
 	if err != nil {
 		return nil, err

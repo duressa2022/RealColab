@@ -28,7 +28,7 @@ type ChatResponse struct {
 	TimeStamp time.Time `json:"timeSatmp" bson:"timeStamp"`
 }
 
-type Message struct {
+type RequestResponse struct {
 	Prompt   string `json:"prompt" bson:"prompt"`
 	Response string `json:"response" bson:"response"`
 }
