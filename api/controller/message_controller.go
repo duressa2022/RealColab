@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"sync"
 	"time"
@@ -99,4 +100,21 @@ func (mc *MessageController) messageHelperMethod(cxt context.Context, messageByt
 	}
 	message.ConversationId = conversation.ConversationID
 
+	_, err = mc.MessageConUseCase.StoreMessage(cxt, message)
+	if err != nil {
+		return err
+	}
+
+	mutex.Lock()
+	receipentClient, ok := Clients[message.ReceipentID.String()]
+	mutex.Unlock()
+	if ok {
+		err := receipentClient.Connection.WriteMessage(websocket.TextMessage, messageByte)
+		if err != nil {
+			return err
+		}
+	} else {
+		return errors.New("user is not online")
+	}
+	return nil
 }

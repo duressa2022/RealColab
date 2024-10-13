@@ -22,3 +22,6 @@ func NewMessageConversation(messageCon *repository.MessageRepository, timeout ti
 func (mc *MessageConversation) CreateOrRetriveConversation(cxt context.Context, participants *domain.ParticipantRequest, message domain.Message) (*domain.Conversation, error) {
 	return mc.MessageConv.CreateOrUpdateConversation(cxt, participants, message)
 }
+func (mc *MessageConversation) StoreMessage(cxt context.Context, message *domain.Message) (*domain.Message, error) {
+	return mc.MessageConv.StoreMessage(cxt, message)
+}
