@@ -59,9 +59,10 @@ func (cc *ChatController) ConductChatHandler(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "success": false, "data": nil})
 		return
 	}
+	//
 
 	content := resp.Candidates[0].Content.Parts
-	
+
 	response := map[string]interface{}{
 		"message":  "message is given",
 		"succcess": true,
