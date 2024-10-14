@@ -75,7 +75,10 @@ func (mc *MessageController) MessageHandler(c *gin.Context) {
 			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "success": false, "data": nil})
 			return
 		}
-		mc.messageHelperMethod(c, messageByte, messageType, client)
+		err = mc.messageHelperMethod(c, messageByte, messageType, client)
+		if err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "success": false, "data": nil})
+		}
 	}
 
 }
