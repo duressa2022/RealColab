@@ -58,8 +58,12 @@ func (mc *MessageController) MessageHandler(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false, "data": nil})
 		return
 	}
-
-	defer connection.Close()
+	defer func() {
+		mutex.Lock()
+		delete(Clients, userID)
+		mutex.Unlock()
+		connection.Close()
+	}()
 
 	client := &domain.Client{
 		Connection: connection,
