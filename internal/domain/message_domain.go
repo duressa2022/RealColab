@@ -2,6 +2,11 @@ package domain
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
+const (
+	MessageCollection      = "messages"
+	ConversationCollection = "conversation"
+)
+
 type Message struct {
 	MessageId      primitive.ObjectID `json:"messageID" bson:"_messageID"`
 	ConversationId primitive.ObjectID `json:"conversationID" bson:"_conversationID"`

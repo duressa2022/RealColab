@@ -21,4 +21,5 @@ func SetUpRoute(env *config.Env, timeout time.Duration, db mongo.Database, route
 	initProtectedTaskRoute(env, timeout, db, protectedRoute.Group("tasks"))
 	initProtectedSuggestRoute(env, timeout, db, protectedRoute.Group("tasks"))
 	initProtectedChatRoute(env, timeout, db, protectedRoute.Group("chats"))
+	initProtectedMessagingRoute(env, timeout, db, protectedRoute.Group("message"))
 }
