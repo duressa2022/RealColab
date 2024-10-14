@@ -19,7 +19,7 @@ func SetUpRoute(env *config.Env, timeout time.Duration, db mongo.Database, route
 	protectedRoute := router.Group("/", middlewares.JwtAuthMiddleWare(env.AccessTokenSecret))
 	initProtectedUserRoutes(env, timeout, db, protectedRoute.Group("user"))
 	initProtectedTaskRoute(env, timeout, db, protectedRoute.Group("tasks"))
-	initProtectedSuggestRoute(env, timeout, db, protectedRoute.Group("tasks"))
+	initProtectedSuggestRoute(env, timeout, db, protectedRoute.Group("suggest"))
 	initProtectedChatRoute(env, timeout, db, protectedRoute.Group("chats"))
 	initProtectedMessagingRoute(env, timeout, db, protectedRoute.Group("message"))
 }

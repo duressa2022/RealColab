@@ -18,5 +18,5 @@ func initProtectedMessagingRoute(env *config.Env, timeout time.Duration, db mong
 		MessageConUseCase: usecase.NewMessageConversation(tr, timeout),
 		Env:               env,
 	}
-	group.POST("/privateMessage", mc.MessageHandler)
+	group.GET("/privateMessage", mc.MessageHandler)
 }
