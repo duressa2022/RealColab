@@ -47,7 +47,7 @@ func (cu *ChatUseCase) CreatePrompt(cxt context.Context, ID string) string {
 	prompt := `Assume you are a digital assistance that is works on advicing user:
 	            :you are going to suggest different kinds of tasks based on user request
 				:you are going to advice the how to do different kinds works or tasks
-				:you are going make plan for different `
+				:you are going make plan for different tasks based on the user history.`
 	if err != nil {
 		return prompt
 	}
