@@ -39,6 +39,7 @@ var upgrader = websocket.Upgrader{
 var Clients = make(map[string]*domain.Client)
 var mutex sync.Mutex
 
+// handler for working with one to one messaging
 func (mc *MessageController) MessageHandler(c *gin.Context) {
 	ID, exist := c.Get("id")
 	if !exist {
@@ -79,6 +80,7 @@ func (mc *MessageController) MessageHandler(c *gin.Context) {
 
 }
 
+// helper function for working message writing and message storing
 func (mc *MessageController) messageHelperMethod(cxt context.Context, messageByte []byte, messageType int, client *domain.Client) error {
 	var message *domain.Message
 	if err := json.Unmarshal(messageByte, &message); err != nil {
