@@ -58,6 +58,7 @@ func (mc *MessageController) MessageHandler(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false, "data": nil})
 		return
 	}
+
 	defer func() {
 		mutex.Lock()
 		delete(Clients, userID)
@@ -76,12 +77,15 @@ func (mc *MessageController) MessageHandler(c *gin.Context) {
 	for {
 		messageType, messageByte, err := connection.ReadMessage()
 		if err != nil {
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "success": false, "data": nil})
+			client.Connection.WriteMessage(websocket.TextMessage, []byte(`"error":"error of disconnection"`))
+			mutex.Lock()
+			delete(Clients, userID)
+			mutex.Unlock()
 			return
 		}
 		err = mc.messageHelperMethod(c, messageByte, messageType, client)
 		if err != nil {
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "success": false, "data": nil})
+			client.Connection.WriteMessage(websocket.TextMessage, []byte(`{"error":"message transmission is halted"}`))
 		}
 	}
 
