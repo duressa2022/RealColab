@@ -27,3 +27,5 @@ type GroupRequest struct {
 	PictureUrl       string `json:"pictureUrl" bson:"pictureUrl"`
 	GroupInformation string `json:"groupInformation" bson:"groupInformation"`
 }
+
+

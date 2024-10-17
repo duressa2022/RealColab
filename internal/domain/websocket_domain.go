@@ -6,3 +6,9 @@ type Client struct {
 	Connection *websocket.Conn
 	UserID     string
 }
+
+type GroupClient struct {
+	Connection *websocket.Conn
+	UserID     string
+	GroupID    string
+}

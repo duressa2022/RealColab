@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"time"
 	"working/super_task/internal/domain"
 	"working/super_task/package/mongo"
 
@@ -12,17 +13,53 @@ import (
 )
 
 type GroupRepos struct {
-	database       mongo.Database
-	collection     string
-	userCollection string
+	database          mongo.Database
+	collection        string
+	userCollection    string
+	conCollection     string
+	messageCollection string
 }
 
-func NewGroupRepos(db mongo.Database, collection string, userCollection string) *GroupRepos {
+func NewGroupRepos(db mongo.Database, collection string, userCollection string, conv string, message string) *GroupRepos {
 	return &GroupRepos{
-		database:       db,
-		collection:     collection,
-		userCollection: userCollection,
+		database:          db,
+		collection:        collection,
+		userCollection:    userCollection,
+		conCollection:     conv,
+		messageCollection: message,
 	}
+}
+
+// method for storing message on the database
+func (gr *GroupRepos) StoreMessage(cxt context.Context, message *domain.GroupMessage) (*domain.GroupMessage, error) {
+	messageCollection := gr.database.Collection(gr.messageCollection)
+	_, err := messageCollection.InsertOne(cxt, message)
+	if err != nil {
+		return nil, err
+	}
+	return message, nil
+}
+
+// method for creating new conversation or retiving existing one
+func (gr *GroupRepos) CreateOrUpdateConversation(cxt context.Context, message domain.GroupMessage) (*domain.GroupConversation, error) {
+	convCollection := gr.database.Collection(gr.conCollection)
+
+	var convModel *domain.GroupConversation
+	err := convCollection.FindOne(cxt, bson.D{{Key: "_groupID", Value: message.GroupID}}).Decode(&convModel)
+	if err != nil {
+		newConvMode := &domain.GroupConversation{
+			ConversationID: primitive.NewObjectID(),
+			LastMessage:    message,
+			CreatedAt:      primitive.NewDateTimeFromTime(time.Now()),
+			UpdatedAt:      primitive.NewDateTimeFromTime(time.Now()),
+		}
+		convModel = newConvMode
+	} else {
+		convModel.LastMessage = message
+		convModel.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
+	}
+	return convModel, nil
+
 }
 
 // method for storing data on the database
@@ -121,19 +158,19 @@ func (gr *GroupRepos) GetAllMembers(cxt context.Context, ID string) ([]map[strin
 	members = append(members, group.GroupMembers...)
 
 	var membersInfos []map[string]interface{}
-	for _,member := range members {
+	for _, member := range members {
 		var user *domain.UserResponse
-		err:=userCollection.FindOne(cxt,bson.D{{Key: "userID",Value: member.UserID}}).Decode(&user)
-		if err!=nil{
-			return nil,err
+		err := userCollection.FindOne(cxt, bson.D{{Key: "userID", Value: member.UserID}}).Decode(&user)
+		if err != nil {
+			return nil, err
 		}
-		userinfo:=map[string]interface{}{
-			"firstName":user.FirstName,
-			"lastName":user.LastName,
-			"profileUrl":user.ProfileUrl,
-			"userID":user.UserID,
+		userinfo := map[string]interface{}{
+			"firstName":  user.FirstName,
+			"lastName":   user.LastName,
+			"profileUrl": user.ProfileUrl,
+			"userID":     user.UserID,
 		}
-		membersInfos=append(membersInfos, userinfo)
+		membersInfos = append(membersInfos, userinfo)
 
 	}
 	return membersInfos, nil

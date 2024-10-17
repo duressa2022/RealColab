@@ -92,3 +92,11 @@ func (gr *GroupUseCase) GetMessages(cxt context.Context, groupID string, size in
 func (gr *GroupUseCase) GetAllMembers(cxt context.Context, groupID string) ([]map[string]interface{}, error) {
 	return gr.GroupRepos.GetAllMembers(cxt, groupID)
 }
+
+// method for creating or retriving group conversation
+func (gr *GroupUseCase) CreateOrRetriveConversation(cxt context.Context, message domain.GroupMessage) (*domain.GroupConversation, error) {
+	return gr.GroupRepos.CreateOrUpdateConversation(cxt, message)
+}
+func (gr *GroupUseCase) StoreMessage(cxt context.Context, message *domain.GroupMessage) (*domain.GroupMessage, error) {
+	return gr.GroupRepos.StoreMessage(cxt, message)
+}
