@@ -19,6 +19,13 @@ type Message struct {
 	TimeStamp      primitive.DateTime `json:"timeStamp" bson:"timeStamp"`
 }
 
+type OneToOneMessage struct {
+	SenderID       string `json:"senderID" bson:"_senderID"`
+	ReceipentID    string `json:"receipentID" bson:"_receipentID"`
+	MessageContent string `json:"messageContent" bson:"messageContent"`
+	MediaUrl       string `json:"mediaUrl" bson:"medaiurl"`
+}
+
 type GroupMessage struct {
 	MessageId      primitive.ObjectID `json:"messageID" bson:"_messageID"`
 	ConversationId primitive.ObjectID `json:"conversationID" bson:"_conversationID"`
@@ -30,6 +37,12 @@ type GroupMessage struct {
 	Status         string             `json:"status" bson:"status"`
 	TimeStamp      primitive.DateTime `json:"timeStamp" bson:"timeStamp"`
 }
+type GroupMessageRequest struct {
+	SenderID       string `json:"senderID" bson:"_senderID"`
+	GroupID        string `json:"groupID" bson:"_groupID"`
+	MessageContent string `json:"messageContent" bson:"messageContent"`
+	MediaUrl       string `json:"mediaUrl" bson:"medaiurl"`
+}
 
 type MessageRequest struct {
 	ConversationId primitive.ObjectID `json:"conversationID" bson:"_conversationID"`
@@ -37,6 +50,12 @@ type MessageRequest struct {
 	MessageContent string             `json:"messageContent" bson:"messageContent"`
 	MediaUrl       string             `json:"mediaUrl" bson:"medaiurl"`
 	Status         string             `json:"status" bson:"status"`
+}
+
+type EditMessage struct {
+	MessageContent string `json:"messageContent" bson:"messageContent"`
+	MediaUrl       string `json:"mediaUrl" bson:"medaiurl"`
+	Status         string `json:"status" bson:"status"`
 }
 
 type Conversation struct {

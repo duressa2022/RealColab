@@ -11,6 +11,7 @@ const (
 	CollectionUser string = "users"
 )
 
+// collection for user information
 type UserInformation struct {
 	UserID          primitive.ObjectID `json:"userID" bson:"_userID"`
 	FirstName       string             `json:"firstName" bson:"firstName"`
@@ -24,22 +25,23 @@ type UserInformation struct {
 	Status          string             `json:"status" bson:"status"`
 	IsVerified      bool               `json:"isVerified" bson:"isVerified"`
 	LastSeen        time.Time          `json:"lastSeen" bson:"lastSeen"`
-	Contacts        []*Contact         `json:"contacts" bson:"contacts"`
 	Rating          UserRating         `json:"rating" bson:"rating"`
 	TaskInformation TaskInformation    `json:"taskInformation" bson:"taskInformation"`
 	TwostepVer      bool               `json:"twoStepVer" bson:"twoStepVer"`
 	CreatedAt       time.Time          `json:"createdAt" bson:"created"`
+	Contacts        []*Contact          `json:"contacts" bson:"contacts"`
 	UpdatedAt       time.Time          `json:"updatedAt" bson:"updatedAt"`
+}
+
+// collection for storing user information
+type Contact struct {
+	ContactID       primitive.ObjectID `json:"contactID" bson:"_contactID"`
+	LastContactTime time.Time          `json:"lastContactTime" bson:"lastContactTime"`
 }
 
 type UserInGroup struct {
 	UserID   primitive.ObjectID `json:"userID" bson:"_userID"`
 	JoinedAt time.Time          `json:"createdAt" bson:"createdAT"`
-}
-
-type Contact struct {
-	ContactID primitive.ObjectID `json:"contactID" bson:"_contactID"`
-	UserName  string             `json:"username" bson:"username"`
 }
 
 type UserRegistrationRequest struct {
@@ -63,12 +65,12 @@ type UserResponse struct {
 	Status          string             `json:"status" bson:"status"`
 	IsVerified      bool               `json:"isVerified" bson:"isVerified"`
 	LastSeen        time.Time          `json:"lastSeen" bson:"lastSeen"`
-	Contacts        []*Contact         `json:"contacts" bson:"contacts"`
 	Rating          UserRating         `json:"rating" bson:"rating"`
 	TaskInformation TaskInformation    `json:"taskInformation" bson:"taskInformation"`
 	TwostepVer      bool               `json:"twoStepVer" bson:"twoStepVer"`
 	CreatedAt       time.Time          `json:"createdAt" bson:"created"`
 	UpdatedAt       time.Time          `json:"updatedAt" bson:"updatedAt"`
+	Contacts        []*Contact          `json:"contacts" bson:"contacts"`
 }
 type UserRating struct {
 	Rating int    `json:"rating" bson:"rating"`

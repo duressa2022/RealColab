@@ -1,19 +1,16 @@
 package controller
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
 	"sync"
-	"time"
 	"working/super_task/config"
 	"working/super_task/internal/domain"
 	usecase "working/super_task/internal/usercase"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type GroupController struct {
@@ -39,20 +36,9 @@ var group_upgrader = websocket.Upgrader{
 var GroupClient = make(map[string]map[string]*domain.GroupClient)
 var group_mutex sync.Mutex
 
-func (gc *GroupController) SendMessage(c *gin.Context) {
-	UserID, exist := c.Get("id")
-	if !exist {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "error of data", "success": false, "data": nil})
-		return
-	}
-
-	userID, ok := UserID.(string)
-	if !ok {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "error of type", "success": false, "data": nil})
-		return
-	}
-
-	groupID := c.Param("groupID")
+func (gc *GroupController) SendMessageHandler(c *gin.Context) {
+	userID := c.Query("username")
+	groupID := c.Query("groupID")
 
 	connection, err := group_upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -75,7 +61,7 @@ func (gc *GroupController) SendMessage(c *gin.Context) {
 	group_mutex.Unlock()
 
 	for {
-		messageType, messageByte, err := connection.ReadMessage()
+		_, messageByte, err := connection.ReadMessage()
 		if err != nil {
 			client.Connection.WriteMessage(websocket.TextMessage, []byte(`"error":"error of disconnection"`))
 			mutex.Lock()
@@ -84,58 +70,32 @@ func (gc *GroupController) SendMessage(c *gin.Context) {
 			return
 		}
 
-		err = gc.messageHelperMethod(c, messageByte, messageType, client)
-		if err != nil {
-			client.Connection.WriteMessage(websocket.TextMessage, []byte(`{"error":"message transmission is halted"}`))
+		var groupMessage *domain.GroupMessageRequest
+		if err := json.Unmarshal(messageByte, &groupMessage); err != nil {
+			client.Connection.WriteMessage(websocket.TextMessage, []byte(`"error":"error while marshaling"`))
+			return
 		}
+		gc.StoreMessage(GroupClient, groupMessage)
 
 	}
 
 }
 
 // helper function for working message writing and message storing
-func (gc *GroupController) messageHelperMethod(cxt context.Context, messageByte []byte, messageType int, client *domain.GroupClient) error {
-	var message *domain.GroupMessage
-	if err := json.Unmarshal(messageByte, &message); err != nil {
-		return err
-	}
+func (gc *GroupController) StoreMessage(connections map[string]map[string]*domain.GroupClient, message *domain.GroupMessageRequest) error {
+	messageByte, err := json.Marshal(message)
 
-	message.TimeStamp = primitive.NewDateTimeFromTime(time.Now())
-	message.Status = "unread"
-	message.MessageType = messageType
-	senderID, err := primitive.ObjectIDFromHex(client.UserID)
-	if err != nil {
-		return err
-	}
-	message.SenderID = senderID
-
-	groupID, err := primitive.ObjectIDFromHex(client.GroupID)
-	if err != nil {
-		return err
-	}
-	message.GroupID = groupID
-	conversation, err := gc.GroupUseCase.CreateOrRetriveConversation(cxt, *message)
-	if err != nil {
-		return err
-	}
-	message.ConversationId = conversation.ConversationID
-
-	_, err = gc.GroupUseCase.StoreMessage(cxt, message)
 	if err != nil {
 		return err
 	}
 
 	mutex.Lock()
-	mutex.Lock()
-	for _, recipient := range GroupClient[client.GroupID] {
-		if recipient.UserID != client.UserID {
-			err := recipient.Connection.WriteJSON(message)
-			if err != nil {
-				delete(GroupClient[client.GroupID], recipient.UserID)
-			}
+	for _, recipients := range connections[message.GroupID] {
+		err := recipients.Connection.WriteMessage(websocket.TextMessage, messageByte)
+		if err != nil {
+			return err
 		}
 	}
-	mutex.Unlock()
 	mutex.Unlock()
 	return nil
 }

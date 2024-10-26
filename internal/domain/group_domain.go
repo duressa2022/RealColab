@@ -6,6 +6,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const (
+	GroupCollection="groups"
+)
+
 type Group struct {
 	GroupID          primitive.ObjectID            `json:"groupID" bson:"_groupID"`
 	CreatorID        primitive.ObjectID            `json:"creatorID" bson:"_creatorID"`

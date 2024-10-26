@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Group Messaging Test</title>
+</head>
+<body>
+    <h2>WebSocket Group Messaging</h2>
+
+    <div>
+        <label for="groupID">Group ID:</label>
+        <input type="text" id="groupID" placeholder="Enter group ID">
+    </div>
+
+    <div>
+        <label for="senderID">Sender ID:</label>
+        <input type="text" id="senderID" placeholder="Enter senderID">
+    </div>
+
+    <div>
+        <label for="message">Message to Send:</label>
+        <input type="text" id="message" placeholder="Enter your message">
+        <button onclick="sendMessage()">Send Message</button>
+    </div>
+
+    <div>
+        <p>Status: <span id="status">Disconnected</span></p>
+        <p>Messages from Server:</p>
+        <ul id="messages"></ul>
+    </div>
+
+    <script>
+        let ws;
+
+        // Function to establish WebSocket connection
+        function connectWebSocket() {
+            const wsURL = `ws://localhost:8080/auth/group?groupID=group&username=user1`; // Use the group ID in the connection URL
+            ws = new WebSocket(wsURL);
+
+            ws.onopen = function() {
+                document.getElementById('status').textContent = 'Connected';
+                console.log('WebSocket connection opened.');
+            };
+
+            ws.onmessage = function(event) {
+                const messageList = document.getElementById('messages');
+                const newMessage = document.createElement('li');
+                newMessage.textContent = `Server: ${event.data}`;
+                messageList.appendChild(newMessage);
+                console.log('Message from server:', event.data);
+            };
+
+            ws.onclose = function() {
+                document.getElementById('status').textContent = 'Disconnected';
+                console.log('WebSocket connection closed.');
+            };
+
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+            };
+        }
+
+        // Function to send a message to the WebSocket server
+        function sendMessage() {
+            const groupID = document.getElementById('groupID').value;
+            const messageInput = document.getElementById('message').value;
+            const SenderID =document.getElementById("senderID").value
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const msg = {
+                    groupID: groupID,
+                    senderID:SenderID,
+                    messageContent: messageInput
+                };
+                ws.send(JSON.stringify(msg));  // Send the message with group info
+                console.log('Sent message:', msg);
+            } else {
+                console.log('WebSocket is not connected.');
+            }
+        }
+
+        // Automatically connect to WebSocket when the page loads
+        window.onload = function() {
+            connectWebSocket();
+        };
+    </script>
+</body>
+</html>

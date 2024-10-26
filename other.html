@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket One-to-One Messaging Test</title>
+</head>
+<body>
+    <h2>WebSocket One-to-One Messaging</h2>
+    <div>
+        <label for="recipient">Recipient Username:</label>
+        <input type="text" id="recipient" placeholder="Enter recipient's username">
+    </div>
+    <div>
+        <label for="message">Message to Send:</label>
+        <input type="text" id="message" placeholder="Enter your message">
+        <button onclick="sendMessage()">Send Message</button>
+    </div>
+    <div>
+        <p>Status: <span id="status">Disconnected</span></p>
+        <p>Messages from Server:</p>
+        <ul id="messages"></ul>
+    </div>
+
+    <script>
+        let ws;
+
+        // Function to establish WebSocket connection
+        function connectWebSocket() {
+            const wsURL = 'ws://localhost:8080/auth/ws?username=user2'; // Use your own username here
+            ws = new WebSocket(wsURL);
+
+            ws.onopen = function() {
+                document.getElementById('status').textContent = 'Connected';
+                console.log('WebSocket connection opened.');
+            };
+
+            ws.onmessage = function(event) {
+                const messageList = document.getElementById('messages');
+                const newMessage = document.createElement('li');
+                newMessage.textContent = `Server: ${event.data}`;
+                messageList.appendChild(newMessage);
+                console.log('Message from server:', event.data);
+            };
+
+            ws.onclose = function() {
+                document.getElementById('status').textContent = 'Disconnected';
+                console.log('WebSocket connection closed.');
+            };
+
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+            };
+        }
+
+        // Function to send a message to the WebSocket server
+        function sendMessage() {
+            const recipient = document.getElementById('recipient').value;
+            const messageInput = document.getElementById('message').value;
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const msg = {
+                    receipentID: recipient,
+                    messageContent: messageInput
+                };
+                ws.send(JSON.stringify(msg));  // Send the message with recipient info
+                console.log('Sent message:', msg);
+            } else {
+                console.log('WebSocket is not connected.');
+            }
+        }
+
+        // Automatically connect to WebSocket when the page loads
+        window.onload = function() {
+            connectWebSocket();
+        };
+    </script>
+</body>
+</html>

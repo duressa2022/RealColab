@@ -25,3 +25,13 @@ func (mc *MessageConversation) CreateOrRetriveConversation(cxt context.Context, 
 func (mc *MessageConversation) StoreMessage(cxt context.Context, message *domain.Message) (*domain.Message, error) {
 	return mc.MessageConv.StoreMessage(cxt, message)
 }
+func (mc *MessageConversation) AddContact(cxt context.Context, userID string, contact *domain.Contact) (map[string]interface{}, error) {
+	contact.LastContactTime = time.Now()
+	return mc.MessageConv.AddContact(cxt, userID, contact)
+}
+func (mc *MessageConversation) SearchUser(cxt context.Context, searchTerm string) ([]map[string]interface{}, error) {
+	return mc.MessageConv.SearchUser(cxt, searchTerm)
+}
+func (mc *MessageConversation) FetchMessagesHistory(cxt context.Context, userID string, contactID string, requestNumber int64, limit int64) ([]*domain.Message, error) {
+	return mc.MessageConv.FetchMessageHistory(cxt, userID, contactID, requestNumber, limit)
+}

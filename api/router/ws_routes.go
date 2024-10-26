@@ -13,10 +13,10 @@ import (
 )
 
 func initProtectedMessagingRoute(env *config.Env, timeout time.Duration, db mongo.Database, group *gin.RouterGroup) {
-	tr := repository.NewMessageRepos(db, domain.MessageCollection, domain.ConversationCollection)
+	tr := repository.NewMessageRepos(db, domain.MessageCollection, domain.ConversationCollection, domain.CollectionUser)
 	mc := controller.MessageController{
 		MessageConUseCase: usecase.NewMessageConversation(tr, timeout),
 		Env:               env,
 	}
-	group.GET("/privateMessage", mc.MessageHandler)
+	group.GET("/ws", mc.MessageHandler)
 }

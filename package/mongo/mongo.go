@@ -29,6 +29,8 @@ type Collection interface {
 	Aggregate(context.Context, interface{}) (Cursor, error)
 	UpdateOne(context.Context, interface{}, interface{}, ...*options.UpdateOptions) (*mongo.UpdateResult, error)
 	UpdateMany(context.Context, interface{}, interface{}, ...*options.UpdateOptions) (*mongo.UpdateResult, error)
+	Distinct(context.Context, string, interface{}, ...*options.DistinctOptions) ([]interface{}, error)
+	DeleteMany(context.Context, interface{}, ...*options.DeleteOptions) (*mongo.DeleteResult, error)
 }
 
 type SingleResult interface {
@@ -161,6 +163,9 @@ func (mc *mongoCollection) DeleteOne(ctx context.Context, filter interface{}) (i
 	count, err := mc.coll.DeleteOne(ctx, filter)
 	return count.DeletedCount, err
 }
+func (mc *mongoCollection) DeleteMany(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	return mc.coll.DeleteMany(ctx, filter, opts...)
+}
 
 func (mc *mongoCollection) Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) (Cursor, error) {
 	findResult, err := mc.coll.Find(ctx, filter, opts...)
@@ -178,6 +183,10 @@ func (mc *mongoCollection) UpdateMany(ctx context.Context, filter interface{}, u
 
 func (mc *mongoCollection) CountDocuments(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error) {
 	return mc.coll.CountDocuments(ctx, filter, opts...)
+}
+
+func (mc *mongoCollection) Distinct(ctx context.Context, name string, filter interface{}, opts ...*options.DistinctOptions) ([]interface{}, error) {
+	return mc.coll.Distinct(ctx, name, filter, opts...)
 }
 
 func (sr *mongoSingleResult) Decode(v interface{}) error {

@@ -8,29 +8,42 @@ import (
 )
 
 const (
-	ChatCollection = "chats"
+	ChatCollection    = "chats"
+	SessionCollection = "sessions"
 )
 
 type ChatMessage struct {
-	ChatID    primitive.ObjectID `json:"chatID" bson:"_chatID"`
-	UserID    primitive.ObjectID `json:"userID" bson:"_userID"`
-	Response  string             `json:"response" bson:"response"`
-	Prompt    string             `json:"prompt" bson:"prompt"`
-	TimeStamp time.Time          `json:"timeStamp" bson:"timeStamp"`
+	ChatID      primitive.ObjectID `json:"chatID" bson:"_chatID"`
+	UserID      primitive.ObjectID `json:"userID" bson:"_userID"`
+	SessionID   primitive.ObjectID `json:"sessionID" bson:"_sessionID"`
+	ChatSummery interface{}        `json:"chatSummery" bson:"chatSummery"`
+	Response    interface{}        `json:"response" bson:"response"`
+	Prompt      string             `json:"prompt" bson:"prompt"`
+	TimeStamp   time.Time          `json:"timeStamp" bson:"timeStamp"`
+}
+
+type SessionHistory struct {
+	UserID      primitive.ObjectID `json:"userID" bson:"_userID"`
+	SessionID   primitive.ObjectID `json:"sessionID" bson:"_sessionID"`
+	ChatSummery interface{}        `json:"chatSummery" bson:"chatSummery"`
+	Activated   bool               `json:"activated" bson:"activated"`
+	TimeStamp   time.Time          `json:"timeStamp" bson:"timeStamp"`
 }
 
 type ChatRequest struct {
-	Prompt string `json:"prompt" bson:"prompt"`
+	Prompt    string `json:"prompt" bson:"prompt"`
+	SessionID string `json:"sessionID" bson:"_sessionID"`
 }
 type ChatResponse struct {
-	Prompt    string    `json:"prompt" bson:"prompt"`
-	Response  string    `json:"response" bson:"response"`
-	TimeStamp time.Time `json:"timeSatmp" bson:"timeStamp"`
+	Prompt      string      `json:"prompt" bson:"prompt"`
+	Response    interface{} `json:"response" bson:"response"`
+	ChatSummery interface{} `json:"chatSummery" bson:"chatSummery"`
+	TimeStamp   time.Time   `json:"timeSatmp" bson:"timeStamp"`
 }
 
 type RequestResponse struct {
-	Prompt   string `json:"prompt" bson:"prompt"`
-	Response string `json:"response" bson:"response"`
+	Prompt   string      `json:"prompt" bson:"prompt"`
+	Response interface{} `json:"response" bson:"response"`
 }
 
 type ChatInterface interface {
