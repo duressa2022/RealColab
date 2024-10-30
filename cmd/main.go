@@ -6,8 +6,6 @@ import (
 	routes "working/super_task/api/router"
 	"working/super_task/config"
 
-	"github.com/gin-contrib/cors"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,15 +24,7 @@ func main() {
 	timeout := time.Duration(env.ContextTimeout) * time.Second
 
 	router := gin.Default()
-	config := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},        // allow frontend origin
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"}, // allowed methods
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true, // allow credentials
-	}
 
-	router.Use(cors.New(config))
 	routes.SetUpRoute(env, timeout, db, router)
 	router.Run(env.ServerAddress)
 }

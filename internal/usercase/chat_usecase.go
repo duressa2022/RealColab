@@ -54,7 +54,7 @@ func (cu *ChatUseCase) CreatePrompt(cxt context.Context, UserID string, SessionI
 
 	prompt := `Assume you are a digital assistance that is works on advicing user:
 	            :you are going to suggest different kinds of tasks based on user request
-				:you are going to advice the how to do different kinds works or tasks
+				:you are going to advice how to do different kinds works or tasks
 				:you are going make plan for different tasks based on the user history.
 				:make your response in html format with proper htmltags(ul,li,p,br)
 				:the chat history is given to you as prompt and response format
