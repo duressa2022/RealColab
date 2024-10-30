@@ -294,7 +294,7 @@ func (pr *PublishedRepos) DeleteComment(cxt context.Context, CommentID string, P
 }
 
 // method for updating like for comments
-func (pr *PublishedRepos) UpdateLikesComment(cxt context.Context, UserID string, PublishedID string, value int) (*domain.Comments, error) {
+func (pr *PublishedRepos) UpdateLikesComment(cxt context.Context, UserID string, PublishedID string,CommentID string, value int) (*domain.Comments, error) {
 	commentCollection := pr.database.Collection(pr.commentsCollection)
 	updateInformation := bson.D{{Key: "$inc", Value: bson.D{{Key: "likes", Value: value}}}}
 
@@ -306,7 +306,12 @@ func (pr *PublishedRepos) UpdateLikesComment(cxt context.Context, UserID string,
 	if err != nil {
 		return nil, err
 	}
-	filter := bson.D{{Key: "_publishedID", Value: publishedID}, {Key: "_userID", Value: userID}}
+
+	commentID, err := primitive.ObjectIDFromHex(CommentID)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.D{{Key: "_publishedID", Value: publishedID}, {Key: "_userID", Value: userID},{Key: "_commentID",Value: commentID}}
 	updateResult, err := commentCollection.UpdateOne(cxt, filter, updateInformation)
 	if err != nil {
 		return nil, err
@@ -327,7 +332,7 @@ func (pr *PublishedRepos) UpdateLikesComment(cxt context.Context, UserID string,
 }
 
 // method for updating dislike for commens
-func (pr *PublishedRepos) UpdateDisLikesComment(cxt context.Context, UserID string, PublishedID string, value int) (*domain.Comments, error) {
+func (pr *PublishedRepos) UpdateDisLikesComment(cxt context.Context, UserID string, PublishedID string,CommentID string, value int) (*domain.Comments, error) {
 	commentCollection := pr.database.Collection(pr.commentsCollection)
 	updateInformation := bson.D{{Key: "$inc", Value: bson.D{{Key: "disLikes", Value: value}}}}
 
@@ -339,7 +344,11 @@ func (pr *PublishedRepos) UpdateDisLikesComment(cxt context.Context, UserID stri
 	if err != nil {
 		return nil, err
 	}
-	filter := bson.D{{Key: "_publishedID", Value: publishedID}, {Key: "_userID", Value: userID}}
+	commentID, err := primitive.ObjectIDFromHex(CommentID)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.D{{Key: "_publishedID", Value: publishedID}, {Key: "_userID", Value: userID},{Key: "_commentID",Value: commentID}}
 	updateResult, err := commentCollection.UpdateOne(cxt, filter, updateInformation)
 	if err != nil {
 		return nil, err

@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	publishedCollection = "published"
-	commentCollection   = "comments"
+	PublishedCollection = "published"
+	CommentCollection   = "comments"
 )
 
 type Published struct {
@@ -57,5 +57,12 @@ type CommentRequest struct {
 	Comment     string             `json:"comment" bson:"comment"`
 }
 type UpdateComment struct {
-	Comment string `json:"comment" bson:"comment"`
+	CommentID   primitive.ObjectID `json:"commentID" bson:"_commentID"`
+	PublishedID primitive.ObjectID `json:"publishedID" bson:"_publishedID"`
+	Comment     string             `json:"comment" bson:"comment"`
+}
+
+type CommentInfo struct {
+	CommentID   primitive.ObjectID `json:"commentID" bson:"_commentID"`
+	PublishedID primitive.ObjectID `json:"publishedID" bson:"_publishedID"`
 }

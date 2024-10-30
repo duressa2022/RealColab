@@ -114,11 +114,11 @@ func (pu *PublishedUseCase) DeleteComment(cxt context.Context, commentID string,
 }
 
 // method for updating like for the comment
-func (pu *PublishedUseCase) LikeVideoCommen(cxt context.Context, UserID string, PublishedID string, value int) (*domain.Comments, error) {
-	return pu.PublishedRepos.UpdateLikesComment(cxt, UserID, PublishedID, value)
+func (pu *PublishedUseCase) LikeVideoComment(cxt context.Context, UserID string, PublishedID string, commentID string , value int) (*domain.Comments, error) {
+	return pu.PublishedRepos.UpdateLikesComment(cxt, UserID, PublishedID, commentID, value)
 }
 
 // method for updating dislike for the video
-func (pu *PublishedUseCase) DislikeVideoComment(cxt context.Context, UserID string, Published string, value int) (*domain.Comments, error) {
-	return pu.PublishedRepos.UpdateDisLikesComment(cxt, UserID, Published, value)
+func (pu *PublishedUseCase) DislikeVideoComment(cxt context.Context, UserID string, Published string, commentID string, value int) (*domain.Comments, error) {
+	return pu.PublishedRepos.UpdateDisLikesComment(cxt, UserID, Published, commentID, value)
 }
