@@ -3,86 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Group Messaging Test</title>
+    <title>Test WebSocket - Future Post Service</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        input, button {
+            padding: 10px;
+            margin-top: 5px;
+            display: block;
+            width: 100%;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <h2>WebSocket Group Messaging</h2>
 
-    <div>
-        <label for="groupID">Group ID:</label>
-        <input type="text" id="groupID" placeholder="Enter group ID">
-    </div>
+    <div class="container">
+        <h2>User Profile</h2>
+        <p><strong>User ID:</strong> <span id="userIdDisplay"></span></p>
+        <p><strong>Number of Posts:</strong> <span id="postCount">0</span></p>
 
-    <div>
-        <label for="senderID">Sender ID:</label>
-        <input type="text" id="senderID" placeholder="Enter senderID">
-    </div>
+        <hr>
 
-    <div>
-        <label for="message">Message to Send:</label>
-        <input type="text" id="message" placeholder="Enter your message">
-        <button onclick="sendMessage()">Send Message</button>
-    </div>
+        <h3>Post Something</h3>
+        <input type="text" id="postInput" placeholder="Enter your post..." required>
+        <button id="postButton">Post</button>
 
-    <div>
-        <p>Status: <span id="status">Disconnected</span></p>
-        <p>Messages from Server:</p>
-        <ul id="messages"></ul>
+        <hr>
+
+        <h3>WebSocket Test</h3>
+        <input type="text" id="postIdInput" placeholder="Enter Post ID..." required>
+        <button id="subscribeButton">Subscribe to Post</button>
+        <button id="unsubscribeButton">Unsubscribe from Post</button>
+
+        <p id="wsStatus" style="color: green;">WebSocket Status: Disconnected</p>
     </div>
 
     <script>
+        function getUserIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get("user_id")?.trim();
+        }
+
+        const userId = getUserIdFromUrl();
+        if (!userId) {
+            alert("User ID is required in the URL. Example: ?user_id=123");
+            throw new Error("User ID not provided in URL");
+        }
+
+        document.getElementById("userIdDisplay").textContent = userId;
+
+        const postInput = document.getElementById("postInput");
+        const postButton = document.getElementById("postButton");
+        const postCountElem = document.getElementById("postCount");
+
+        const postIdInput = document.getElementById("postIdInput");
+        const subscribeButton = document.getElementById("subscribeButton");
+        const unsubscribeButton = document.getElementById("unsubscribeButton");
+        const wsStatus = document.getElementById("wsStatus");
+
+        let postCount = 0;
         let ws;
+        let reconnectInterval = 3000;
 
-        // Function to establish WebSocket connection
         function connectWebSocket() {
-            const wsURL = `ws://localhost:8080/auth/group?groupID=group&username=user1`; // Use the group ID in the connection URL
-            ws = new WebSocket(wsURL);
+            
+            ws = new WebSocket(`wss://future-post-service-1.onrender.com/auth/ws/room`);
 
-            ws.onopen = function() {
-                document.getElementById('status').textContent = 'Connected';
-                console.log('WebSocket connection opened.');
+            ws.onopen = () => {
+                console.log("WebSocket connected!");
+                wsStatus.textContent = "WebSocket Status: Connected";
+                wsStatus.style.color = "green";
             };
 
-            ws.onmessage = function(event) {
-                const messageList = document.getElementById('messages');
-                const newMessage = document.createElement('li');
-                newMessage.textContent = `Server: ${event.data}`;
-                messageList.appendChild(newMessage);
-                console.log('Message from server:', event.data);
+            ws.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                console.log("Received WebSocket message:", message);
+
+                if (message.event_type === "like-counter-post") {
+                    postCount = message.likes;
+                    postCountElem.textContent = postCount;
+                }
             };
 
-            ws.onclose = function() {
-                document.getElementById('status').textContent = 'Disconnected';
-                console.log('WebSocket connection closed.');
+            ws.onerror = (error) => {
+                console.error("WebSocket error:", error);
+                wsStatus.textContent = "WebSocket Status: Error!";
+                wsStatus.style.color = "red";
             };
 
-            ws.onerror = function(error) {
-                console.error('WebSocket error:', error);
+            ws.onclose = () => {
+                console.warn("WebSocket closed. Reconnecting...");
+                wsStatus.textContent = "WebSocket Status: Reconnecting...";
+                wsStatus.style.color = "orange";
+                setTimeout(connectWebSocket, reconnectInterval);
             };
         }
 
-        // Function to send a message to the WebSocket server
-        function sendMessage() {
-            const groupID = document.getElementById('groupID').value;
-            const messageInput = document.getElementById('message').value;
-            const SenderID =document.getElementById("senderID").value
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                const msg = {
-                    groupID: groupID,
-                    senderID:SenderID,
-                    messageContent: messageInput
-                };
-                ws.send(JSON.stringify(msg));  // Send the message with group info
-                console.log('Sent message:', msg);
+        connectWebSocket();
+
+        function sendMessage(msg) {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(msg));
+                console.log("Sent:", msg);
             } else {
-                console.log('WebSocket is not connected.');
+                console.warn("WebSocket is closed, cannot send message.");
             }
         }
 
-        // Automatically connect to WebSocket when the page loads
-        window.onload = function() {
-            connectWebSocket();
-        };
+        postButton.addEventListener("click", () => {
+            const message = postInput.value.trim();
+            if (!message) return;
+
+            const postData = {
+                user_id: userId,
+                content: message,
+                image_url: "This is the link for image on cloudinary",
+                for_network: true,
+                for_public: false
+            };
+
+            fetch(`http://localhost:8080/auth/posts/${userId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(postData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    sendMessage({ event_type: "new_post" });
+                    postInput.value = "";
+                }
+            })
+            .catch(error => console.error("Error posting:", error));
+        });
+
+        subscribeButton.addEventListener("click", () => {
+            const postId = postIdInput.value.trim();
+            if (!postId) {
+                alert("Enter a Post ID to subscribe.");
+                return;
+            }
+
+            sendMessage({
+                event_type: "subscribe-from-post",
+                data: postId
+            });
+
+            console.log("Subscribed to post:", postId);
+        });
+
+        unsubscribeButton.addEventListener("click", () => {
+            const postId = postIdInput.value.trim();
+            if (!postId) {
+                alert("Enter a Post ID to unsubscribe.");
+                return;
+            }
+
+            sendMessage({
+                event_type: "unsubscribe-from-post",
+                data: postId
+            });
+
+            console.log("Unsubscribed from post:", postId);
+        });
     </script>
+
 </body>
 </html>

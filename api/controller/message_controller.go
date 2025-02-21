@@ -9,6 +9,7 @@ import (
 	"working/super_task/config"
 	"working/super_task/internal/domain"
 	usecase "working/super_task/internal/usercase"
+	"working/super_task/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -78,6 +79,17 @@ func (mc *MessageController) MessageHandler(c *gin.Context) {
 			return
 		}
 		message.SenderID = userID
+
+		sentiment, err := models.SentimentAnalysis(mc.Env, message.MessageContent)
+		if err != nil {
+			client.Connection.WriteMessage(websocket.TextMessage, []byte("Error happen while testing!!!"))
+			return
+		}
+		if sentiment["response"] == false {
+			client.Connection.WriteMessage(websocket.TextMessage, []byte("error while sending messages !!!"))
+			return
+		}
+
 		SendMessage(Clients, message)
 
 	}

@@ -1,0 +1,16 @@
+services:
+  - name: RealColab
+    type: web
+    env: docker
+    repo:  https://github.com/duressa2022/RealColab
+    region: oregon
+    plan: free
+    branch: main
+    rootDir: .
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DB_NAME
+        sync: false
+      - key: PORT
+        value: "8080"

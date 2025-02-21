@@ -8,6 +8,7 @@ import (
 	"working/super_task/config"
 	"working/super_task/internal/domain"
 	usecase "working/super_task/internal/usercase"
+	"working/super_task/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -73,6 +74,15 @@ func (gc *GroupController) SendMessageHandler(c *gin.Context) {
 		var groupMessage *domain.GroupMessageRequest
 		if err := json.Unmarshal(messageByte, &groupMessage); err != nil {
 			client.Connection.WriteMessage(websocket.TextMessage, []byte(`"error":"error while marshaling"`))
+			return
+		}
+		sentiment, err := models.SentimentAnalysis(gc.Env,groupMessage.MessageContent)
+		if err != nil {
+			client.Connection.WriteMessage(websocket.TextMessage, []byte("Error happen while testing!!!"))
+			return
+		}
+		if sentiment["response"] == false {
+			client.Connection.WriteMessage(websocket.TextMessage, []byte("error while sending messages !!!"))
 			return
 		}
 		gc.StoreMessage(GroupClient, groupMessage)

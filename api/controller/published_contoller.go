@@ -6,6 +6,7 @@ import (
 	"working/super_task/config"
 	"working/super_task/internal/domain"
 	usecase "working/super_task/internal/usercase"
+	"working/super_task/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -296,6 +297,16 @@ func (pc *PublishedController) CreateCommentHandler(c *gin.Context) {
 		return
 	}
 
+	sentiment, err := models.SentimentAnalysis(pc.Env, comment.Comment)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": true, "data": nil})
+		return
+	}
+	if sentiment["response"] == false {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "your comment is not valid", "success": true, "data": nil})
+		return
+	}
+
 	created, err := pc.PublishedUseCase.NewComment(c, userID, publishedID, comment)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "success": false, "data": nil})
@@ -396,6 +407,7 @@ func (pc *PublishedController) DeleteCommentHandler(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, response)
 
 }
+
 // handler for working with like comments version
 func (pc *PublishedController) LikeCommentHandler(c *gin.Context) {
 	type LikeValue struct {
@@ -427,11 +439,11 @@ func (pc *PublishedController) LikeCommentHandler(c *gin.Context) {
 	}
 
 	var commentInfo *domain.CommentInfo
-	if err:=c.BindJSON(&commentInfo);err!=nil{
-		c.IndentedJSON(http.StatusBadRequest,gin.H{"message":err.Error(),"success":false,"data":nil})
+	if err := c.BindJSON(&commentInfo); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false, "data": nil})
 	}
 
-	updated, err := pc.PublishedUseCase.LikeVideoComment(c,userID,commentInfo.PublishedID.String(),commentInfo.CommentID.String(),value)
+	updated, err := pc.PublishedUseCase.LikeVideoComment(c, userID, commentInfo.PublishedID.String(), commentInfo.CommentID.String(), value)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "success": false, "data": nil})
 		return
@@ -476,11 +488,11 @@ func (pc *PublishedController) DisLikeCommentHandler(c *gin.Context) {
 	}
 
 	var commentInfo *domain.CommentInfo
-	if err:=c.BindJSON(&commentInfo);err!=nil{
-		c.IndentedJSON(http.StatusBadRequest,gin.H{"message":err.Error(),"success":false,"data":nil})
+	if err := c.BindJSON(&commentInfo); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error(), "success": false, "data": nil})
 	}
 
-	updated, err := pc.PublishedUseCase.DislikeVideoComment(c,userID,commentInfo.PublishedID.String(),commentInfo.CommentID.String(),value)
+	updated, err := pc.PublishedUseCase.DislikeVideoComment(c, userID, commentInfo.PublishedID.String(), commentInfo.CommentID.String(), value)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error(), "success": false, "data": nil})
 		return

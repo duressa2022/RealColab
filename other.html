@@ -27,7 +27,7 @@
 
         // Function to establish WebSocket connection
         function connectWebSocket() {
-            const wsURL = 'ws://localhost:8080/auth/ws?username=user2'; // Use your own username here
+            const wsURL = 'ws://localhost:8080/auth/ws'; // Use your own username here
             ws = new WebSocket(wsURL);
 
             ws.onopen = function() {
